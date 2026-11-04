@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#103ce8">
+<title>OMOK 한 판 — 쉬는 시간 오목</title>
+<style>
+:root{--blue:#103ce8;--lime:#d6ff3f;--glass:rgba(255,255,255,.13);--line:rgba(255,255,255,.38);--disp:"Arial Black","Helvetica Neue","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;color:#fff;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;background:radial-gradient(circle at 88% 0,#4d7bff 0,transparent 42%),radial-gradient(circle at 0 55%,#0a28b8 0,transparent 50%),var(--blue);background-attachment:fixed;user-select:none;-webkit-user-select:none;overflow-x:hidden}
+.app{max-width:520px;margin:0 auto;padding:14px 16px 30px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{display:inline-block;padding:9px 16px;border:1px solid var(--line);border-radius:999px;background:var(--glass);backdrop-filter:blur(10px);font-size:13px;font-weight:800;letter-spacing:.08em}
+.hero{position:relative;padding:34px 0 18px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:.1em;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--glass)}
+.eyebrow i{width:9px;height:9px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
+h1{margin:18px 0 12px;font-family:var(--disp);font-weight:900;font-size:clamp(54px,18vw,92px);line-height:.92;letter-spacing:-.04em;position:relative;z-index:2}
+h1 em{font-style:normal;color:var(--lime)}
+.sub{margin:0;font-size:19px;line-height:1.5;font-weight:600;opacity:.92;position:relative;z-index:2}
+.ring{position:absolute;right:-34px;top:40px;width:170px;height:170px;border-radius:50%;background:conic-gradient(from 20deg,#fff,#8fa9ff,#fff,#4a6dff,#e8eeff,#fff);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 20px),#000 calc(100% - 19px));mask:radial-gradient(farthest-side,transparent calc(100% - 20px),#000 calc(100% - 19px));opacity:.9;animation:fl 6s ease-in-out infinite;z-index:1}
+.star{position:absolute;right:30px;top:6px;width:54px;height:54px;fill:var(--lime);animation:sp 9s linear infinite;z-index:1}
+@keyframes fl{50%{transform:translateY(12px) rotate(20deg)}}
+@keyframes sp{to{transform:rotate(360deg)}}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 18px}
+.stat{padding:14px 18px;border:1px solid var(--line);border-radius:26px;background:var(--glass);backdrop-filter:blur(10px)}
+.stat small{display:block;font-size:12px;font-weight:800;letter-spacing:.14em;opacity:.8}
+.stat b{font-family:var(--disp);font-size:52px;line-height:1.1;font-weight:900}
+.stat span{font-size:18px;font-weight:800;margin-left:6px}
+.label{font-size:13px;font-weight:800;letter-spacing:.14em;opacity:.85;margin:0 0 8px 4px}
+.row{display:grid;gap:8px;margin:10px 0}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+button{font:inherit;font-size:19px;font-weight:800;padding:16px 8px;border-radius:999px;border:1.5px solid var(--line);background:var(--glass);color:#fff;cursor:pointer;backdrop-filter:blur(10px);transition:transform .1s}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.35}
+.lv.on,.lime,#ovBtn{background:var(--lime);border-color:var(--lime);color:var(--blue)}
+#status{display:flex;align-items:center;gap:12px;margin:16px 0;padding:16px 22px;border-radius:999px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);font-size:21px;font-weight:800;min-height:62px}
+#status::before{content:"";flex:none;width:13px;height:13px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime)}
+#status.win{background:var(--lime);color:var(--blue);border-color:var(--lime)}
+#status.win::before{background:var(--blue);box-shadow:none}
+#status.lose{background:rgba(0,0,0,.3)}
+#boardWrap{position:relative;width:100%;aspect-ratio:1/1;border:10px solid rgba(255,255,255,.2);border-radius:30px;overflow:hidden;box-shadow:0 18px 40px rgba(0,10,90,.45);background:#e2ae62}
+#scroller{width:100%;height:100%;overflow:auto;-webkit-overflow-scrolling:touch}
+canvas{display:block;touch-action:manipulation}
+#ov{position:absolute;inset:0;background:rgba(16,60,232,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center}
+#ov.hidden{display:none}
+.pop{background:#fff;color:var(--blue);border-radius:30px;padding:24px 20px;text-align:center;width:82%}
+.em{font-family:var(--disp);font-size:40px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.msg{font-size:24px;font-weight:800;margin:8px 0 16px}
+.pop button{width:100%;margin-top:8px}
+#ovClose{background:#eef1ff;border-color:#eef1ff;color:var(--blue)}
+.marquee{overflow:hidden;white-space:nowrap;margin:26px -16px 14px;padding:13px 0;background:var(--lime);color:var(--blue);font-family:var(--disp);font-weight:900;font-size:18px;transform:rotate(-1.5deg)}
+.marquee div{display:inline-block;animation:mq 16s linear infinite}
+@keyframes mq{to{transform:translateX(-50%)}}
+footer{text-align:center;font-size:12px;font-weight:700;letter-spacing:.08em;opacity:.8;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top"><span class="pill">OMOK CLUB ↗</span><span class="pill">VS COMPUTER</span></header>
+
+  <section class="hero">
+    <div class="eyebrow"><i></i>BREAK TIME · 쉬는 시간 한 판</div>
+    <h1>OMOK<br><em>한 판.</em></h1>
+    <p class="sub">컴퓨터와 가볍게,<br>쉬는 시간의 한 수.</p>
+    <div class="ring"></div>
+    <svg class="star" viewBox="0 0 100 100"><path d="M50 0C54 34 66 46 100 50C66 54 54 66 50 100C46 66 34 54 0 50C34 46 46 34 50 0Z"/></svg>
+  </section>
+
+  <section class="cards">
+    <div class="stat"><small>01 / WIN</small><b id="w">0</b><span>승</span></div>
+    <div class="stat"><small>02 / LOSE</small><b id="l">0</b><span>패</span></div>
+  </section>
+
+  <div class="label">LEVEL / 난이도</div>
+  <div class="row g3">
+    <button class="lv" data-l="1">쉬움</button>
+    <button class="lv" data-l="2">보통</button>
+    <button class="lv" data-l="3">어려움</button>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="boardWrap">
+    <div id="scroller"><canvas id="cv"></canvas></div>
+    <div id="ov" class="hidden">
+      <div class="pop">
+        <div class="em" id="ovE"></div>
+        <div class="msg" id="ovM"></div>
+        <button id="ovBtn">한 판 더 ↗</button>
+        <button id="ovClose">판 보기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g2">
+    <button id="undo">한 수 무르기</button>
+    <button id="new" class="lime">새 게임 ↗</button>
+  </div>
+  <div class="row"><button id="snd"></button></div>
+
+  <div class="marquee"><div>ONE MORE GAME. ONE MORE MOVE. ✦ ONE MORE GAME. ONE MORE MOVE. ✦ ONE MORE GAME. ONE MORE MOVE. ✦ ONE MORE GAME. ONE MORE MOVE. ✦ ONE MORE GAME. ONE MORE MOVE. ✦ ONE MORE GAME. ONE MORE MOVE. ✦ </div></div>
+  <footer>MAKE A MOVE. TAKE A BREAK.<br>© 2026 OMOK 한 판. ALL GOOD MOVES START HERE.</footer>
+</div>
+
+<script>
+(()=>{
+const N=15,$=id=>document.getElementById(id);
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+let cfg=Object.assign({level:2,sound:true},store.get('omok_cfg',{}));
+let rec=Object.assign({w:0,l:0},store.get('omok_rec',{}));
+let b=new Uint8Array(N*N),hist=[],over=false,busy=false,zoom=false,win=null,cell=12,t1,t2;
+const cv=$('cv'),ctx=cv.getContext('2d'),sc=$('scroller');
+const dirs=[[1,0],[0,1],[1,1],[1,-1]];
+const get=(x,y)=>x<0||y<0||x>=N||y>=N?3:b[y*N+x];
+
+/* ---------- 효과음 (코드로 생성) ---------- */
+let AC;
+function ac(){
+  if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+  if(AC&&AC.state==='suspended')AC.resume();
+  return AC;
+}
+function tone(f,t,d,type,v,f2){
+  const a=ac();if(!a||!cfg.sound)return;
+  const s=a.currentTime+t,o=a.createOscillator(),g=a.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,s);
+  if(f2)o.frequency.exponentialRampToValueAtTime(f2,s+d);
+  g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);
+  o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d+.03);
+}
+const sfx={
+  black(){tone(1200,0,.07,'triangle',.5,350);tone(2400,0,.02,'square',.12)},
+  white(){tone(620,0,.12,'sine',.6,200);tone(1500,0,.03,'triangle',.2)},
+  win(){[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,i*.13,.25,'triangle',.4))},
+  lose(){[392,349,311,262].forEach((f,i)=>tone(f,i*.25,.4,'sawtooth',.15,f*.9))}
+};
+
+/* ---------- 그리기 ---------- */
+function layout(){
+  const W=sc.clientWidth,css=zoom?N*36:W,d=window.devicePixelRatio||1;
+  cell=css/N;
+  cv.style.width=cv.style.height=css+'px';
+  cv.width=cv.height=Math.round(css*d);
+  ctx.setTransform(d,0,0,d,0,0);
+  draw();
+}
+function stone(x,y,v){
+  const cx=(x+.5)*cell,cy=(y+.5)*cell,r=cell*.44;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=cell*.2;ctx.shadowOffsetY=cell*.08;
+  const g=ctx.createRadialGradient(cx-r*.35,cy-r*.35,r*.1,cx,cy,r);
+  if(v==1){g.addColorStop(0,'#666');g.addColorStop(1,'#050505')}
+  else{g.addColorStop(0,'#fff');g.addColorStop(1,'#d8d8d8')}
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();
+  ctx.restore();
+}
+function draw(){
+  const S=cell*N;
+  const g=ctx.createLinearGradient(0,0,S,S);
+  g.addColorStop(0,'#efc27c');g.addColorStop(1,'#d9a257');
+  ctx.fillStyle=g;ctx.fillRect(0,0,S,S);
+  ctx.lineWidth=1;
+  for(let y=3;y<S;y+=7){
+    ctx.strokeStyle='rgba(120,70,20,'+(0.05+0.04*Math.sin(y*.9))+')';
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(S,y+Math.sin(y)*3);ctx.stroke();
+  }
+  ctx.strokeStyle='#6b4220';ctx.lineWidth=zoom?1.4:1;ctx.beginPath();
+  for(let i=0;i<N;i++){
+    const p=(i+.5)*cell;
+    ctx.moveTo(.5*cell,p);ctx.lineTo((N-.5)*cell,p);
+    ctx.moveTo(p,.5*cell);ctx.lineTo(p,(N-.5)*cell);
+  }
+  ctx.stroke();
+  ctx.fillStyle='#6b4220';
+  for(const x of [3,7,11])for(const y of [3,7,11]){
+    ctx.beginPath();ctx.arc((x+.5)*cell,(y+.5)*cell,cell*.14,0,7);ctx.fill();
+  }
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const v=b[y*N+x];if(v)stone(x,y,v)}
+  const l=hist[hist.length-1];
+  if(l){ctx.fillStyle='#ff3b5c';ctx.beginPath();ctx.arc((l.x+.5)*cell,(l.y+.5)*cell,cell*.2,0,7);ctx.fill()}
+  if(win){
+    const a=win[0],z=win[win.length-1];
+    ctx.lineCap='round';ctx.strokeStyle='rgba(255,59,92,.85)';ctx.lineWidth=cell*.22;
+    ctx.beginPath();ctx.moveTo((a.x+.5)*cell,(a.y+.5)*cell);ctx.lineTo((z.x+.5)*cell,(z.y+.5)*cell);ctx.stroke();
+    ctx.strokeStyle='#ffd43b';ctx.lineWidth=cell*.12;
+    for(const s of win){ctx.beginPath();ctx.arc((s.x+.5)*cell,(s.y+.5)*cell,cell*.5,0,7);ctx.stroke()}
+  }
+}
+function vis(x,y){
+  if(!zoom)return;
+  const px=(x+.5)*cell,py=(y+.5)*cell,m=cell*3;
+  if(px<sc.scrollLeft+m||px>sc.scrollLeft+sc.clientWidth-m)sc.scrollLeft=px-sc.clientWidth/2;
+  if(py<sc.scrollTop+m||py>sc.scrollTop+sc.clientHeight-m)sc.scrollTop=py-sc.clientHeight/2;
+}
+
+/* ---------- 컴퓨터(백돌) ---------- */
+const tbl=(n,o)=>n>=5?1e5:!o?0:n==4?(o==2?2e4:5e3):n==3?(o==2?2e3:200):n==2?(o==2?150:15):(o==2?10:1);
+function ps(x,y,p){
+  let sum=0,big=0;
+  for(const[dx,dy]of dirs){
+    let a=0,cx=x+dx,cy=y+dy;
+    while(get(cx,cy)==p){a++;cx+=dx;cy+=dy}
+    const e1=get(cx,cy),f1=[cx,cy];
+    let c2=0;cx=x-dx;cy=y-dy;
+    while(get(cx,cy)==p){c2++;cx-=dx;cy-=dy}
+    const e2=get(cx,cy),f2=[cx,cy];
+    const len=1+a+c2;
+    let s=tbl(len,(e1==0)+(e2==0));
+    if(len<5){
+      if(e1==0){let k=0;cx=f1[0]+dx;cy=f1[1]+dy;while(get(cx,cy)==p){k++;cx+=dx;cy+=dy}if(k)s=Math.max(s,tbl(Math.min(len+k,4),1)*.9)}
+      if(e2==0){let k=0;cx=f2[0]-dx;cy=f2[1]-dy;while(get(cx,cy)==p){k++;cx-=dx;cy-=dy}if(k)s=Math.max(s,tbl(Math.min(len+k,4),1)*.9)}
+    }
+    sum+=s;if(s>=2e3)big++;
+  }
+  return sum+(big>1?3e3:0);
+}
+function pick(){
+  const near=new Uint8Array(N*N);let any=0;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(b[y*N+x]){
+    any=1;
+    for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++){
+      const nx=x+i,ny=y+j;
+      if(nx>=0&&ny>=0&&nx<N&&ny<N)near[ny*N+nx]=1;
+    }
+  }
+  if(!any)return{x:7,y:7};
+  let cs=[];
+  for(let i=0;i<N*N;i++)if(near[i]&&!b[i])cs.push(i);
+  if(!cs.length){for(let i=0;i<N*N;i++)if(!b[i]){cs.push(i);break}}
+  const L=cfg.level,blind=L==1&&Math.random()<.35;
+  const wa=L==3?1.1:1,wd=L==1?(blind?.02:.4):L==2?.95:1.05;
+  const arr=cs.map(i=>{
+    const x=i%N,y=i/N|0,a=ps(x,y,2),d=ps(x,y,1);
+    let s=a*wa+d*wd+(15-Math.abs(x-7)-Math.abs(y-7))*.3;
+    if(L==1)s*=.4+Math.random()*1.2;
+    else if(L==2)s*=.92+Math.random()*.16;
+    return{i,x,y,a,d,s};
+  });
+  arr.sort((p,q)=>q.s-p.s);
+  if(L==1){const w=arr.find(o=>o.a>=1e5);if(w&&Math.random()<.7)return w}
+  if(L==3){
+    const top=arr.slice(0,5);
+    for(const o of top)if(o.a>=1e5)return o;
+    for(const o of top){
+      b[o.i]=2;let m=0;
+      for(const c of arr){if(c.i===o.i)continue;const v=ps(c.x,c.y,1);if(v>m)m=v}
+      b[o.i]=0;o.s-=m*.5;
+    }
+    top.sort((p,q)=>q.s-p.s);
+    return top[0];
+  }
+  return arr[0];
+}
+
+/* ---------- 게임 진행 ---------- */
+function check(x,y,p){
+  for(const[dx,dy]of dirs){
+    const run=[{x,y}];
+    let cx=x+dx,cy=y+dy;
+    while(get(cx,cy)===p){run.push({x:cx,y:cy});cx+=dx;cy+=dy}
+    cx=x-dx;cy=y-dy;
+    while(get(cx,cy)===p){run.unshift({x:cx,y:cy});cx-=dx;cy-=dy}
+    if(run.length>=5)return run;
+  }
+  return null;
+}
+function setStatus(t,c){const s=$('status');s.textContent=t;s.className=c||''}
+function upd(){
+  $('w').textContent=rec.w;$('l').textContent=rec.l;
+  document.querySelectorAll('.lv').forEach(x=>x.classList.toggle('on',+x.dataset.l===cfg.level));
+  $('undo').disabled=busy||over||hist.length<2;
+  $('snd').textContent=cfg.sound?'소리 켜짐 · ON':'소리 꺼짐 · OFF';
+}
+function move(x,y,p){
+  b[y*N+x]=p;hist.push({x,y,p});
+  p==1?sfx.black():sfx.white();
+  draw();vis(x,y);
+}
+function finish(x,y,p){
+  const w=check(x,y,p);
+  if(w){
+    over=true;win=w;draw();
+    if(p==1){rec.w++;sfx.win();setStatus('이겼어요! 대단해요!','win')}
+    else{rec.l++;sfx.lose();setStatus('졌어요... 다시 도전!','lose')}
+    store.set('omok_rec',rec);upd();
+    t2=setTimeout(()=>{
+      $('ovE').textContent=p==1?'YOU WIN.':'NEXT TIME.';
+      $('ovM').textContent=p==1?'승리!':'아쉬워요';
+      $('ov').classList.remove('hidden');
+    },1100);
+    return true;
+  }
+  if(hist.length>=N*N){over=true;setStatus('무승부예요!');upd();return true}
+  return false;
+}
+function ai(){
+  const m=pick();
+  move(m.x,m.y,2);busy=false;
+  if(finish(m.x,m.y,2))return;
+  setStatus('내 차례예요 — 돌을 놓아 주세요');upd();
+}
+function newGame(){
+  clearTimeout(t1);clearTimeout(t2);
+  b.fill(0);hist=[];over=false;busy=false;win=null;
+  $('ov').classList.add('hidden');
+  setStatus('내 차례예요 — 돌을 놓아 주세요');
+  draw();upd();
+}
+
+/* ---------- 이벤트 ---------- */
+cv.addEventListener('click',e=>{
+  if(over||busy)return;
+  const r=cv.getBoundingClientRect();
+  const x=Math.floor((e.clientX-r.left)/cell),y=Math.floor((e.clientY-r.top)/cell);
+  if(x<0||y<0||x>=N||y>=N||b[y*N+x])return;
+  move(x,y,1);
+  if(finish(x,y,1))return;
+  busy=true;setStatus('생각 중...');upd();
+  t1=setTimeout(ai,450+Math.random()*350);
+});
+document.querySelectorAll('.lv').forEach(btn=>btn.onclick=()=>{
+  cfg.level=+btn.dataset.l;store.set('omok_cfg',cfg);upd();
+});
+$('undo').onclick=()=>{
+  if(busy||over||hist.length<2)return;
+  for(let i=0;i<2;i++){const m=hist.pop();b[m.y*N+m.x]=0}
+  draw();setStatus('한 수 물렀어요. 내 차례!');upd();
+};
+$('new').onclick=newGame;
+$('ovBtn').onclick=newGame;
+$('ovClose').onclick=()=>$('ov').classList.add('hidden');
+$('snd').onclick=()=>{
+  cfg.sound=!cfg.sound;store.set('omok_cfg',cfg);upd();
+  if(cfg.sound)sfx.black();
+};
+window.addEventListener('resize',layout);
+
+setStatus('내 차례예요 — 돌을 놓아 주세요');
+layout();upd();
+})();
+</script>
+</body>
+</html>
